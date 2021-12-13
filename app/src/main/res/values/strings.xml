@@ -9,4 +9,5 @@
     <string name="burned">Burned</string>
     <string name="metre">m</string>
     <string name="distance">Distance</string>
+    <string name="bluetooth_not_connected">Bluetooth Not Connected</string>
 </resources>
