@@ -10,7 +10,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.example.miclone.Constants.CALORIES_CHAR_UUID
 import com.example.miclone.Constants.MI_BAND_MAX_ADDRESS
+import com.example.miclone.Constants.SERVICE_UUID
+import com.example.miclone.Constants.STEPS_CHAR_UUID
 import com.example.miclone.databinding.FragmentHomeBinding
 import java.lang.IllegalArgumentException
 
@@ -54,10 +57,42 @@ class HomeFragment : Fragment() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED){
                 Log.d(TAG,"Device with ${gatt.device.address} is connected")
+                bluetoothGatt = gatt
+                bluetoothGatt?.discoverServices()
             }else if (newState == BluetoothProfile.STATE_DISCONNECTED){
                 Log.d(TAG,"Device Disconnected")
             }
         }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+            Log.d(TAG,"Services Discovered")
+            val serviceUUID = gatt?.getService(SERVICE_UUID)
+            val stepCharUuid = serviceUUID?.getCharacteristic(STEPS_CHAR_UUID)
+            readDataFromDevice(stepCharUuid)
+            val caloriesCharUuid = serviceUUID?.getCharacteristic(CALORIES_CHAR_UUID)
+            readDataFromDevice(caloriesCharUuid)
+        }
+
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt?,
+            characteristic: BluetoothGattCharacteristic?,
+            status: Int
+        ) {
+            if(status == BluetoothGatt.GATT_SUCCESS){
+                when(characteristic?.uuid){
+                    STEPS_CHAR_UUID -> {
+                        Log.d(TAG, characteristic.value!!.toHexString())
+                    }
+                    CALORIES_CHAR_UUID -> {
+                        Log.d(TAG, characteristic.value!!.toHexString())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun readDataFromDevice(uuid: BluetoothGattCharacteristic?) {
+        bluetoothGatt?.readCharacteristic(uuid)
     }
 
     private fun promptBluetoothEnable() {
@@ -82,11 +117,14 @@ class HomeFragment : Fragment() {
         }
     }
 
+    fun ByteArray.toHexString() = joinToString ("-"){ "%02x".format(it) }
+
     override fun onDestroy() {
         super.onDestroy()
         bluetoothGatt?.close()
         bluetoothGatt = null
     }
+
     companion object{
         private const val ENABLE_BLUETOOTH_REQUEST_CODE = 1
         private const val TAG = "MI_BAND"
