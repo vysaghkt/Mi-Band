@@ -19,6 +19,19 @@
         app:layout_constraintTop_toTopOf="parent"
         android:visibility="invisible"/>
 
+    <TextView
+        android:id="@+id/batteryPercentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="20dp"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/bluetoothConnected"
+        tools:text="100%" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -129,5 +142,15 @@
         app:layout_constraintEnd_toEndOf="@+id/textView5"
         app:layout_constraintStart_toStartOf="@+id/stepsTextView"
         app:layout_constraintTop_toBottomOf="@+id/stepsTextView" />
+
+    <TextView
+        android:id="@+id/lastUpdated"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/textView5"
+        app:layout_constraintStart_toStartOf="@+id/caloriesTextView"
+        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        tools:text="Last Updated: 14 Dec 2021, 10:53" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

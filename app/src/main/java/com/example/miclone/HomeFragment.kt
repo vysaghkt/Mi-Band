@@ -13,7 +13,7 @@ import android.view.ViewGroup
 import com.example.miclone.Constants.CALORIES_CHAR_UUID
 import com.example.miclone.Constants.MI_BAND_MAX_ADDRESS
 import com.example.miclone.Constants.SERVICE_UUID
-import com.example.miclone.Constants.STEPS_CHAR_UUID
+import com.example.miclone.Constants.BATTERY_CHAR_UUID
 import com.example.miclone.databinding.FragmentHomeBinding
 import java.lang.IllegalArgumentException
 
@@ -69,9 +69,9 @@ class HomeFragment : Fragment() {
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             Log.d(TAG,"Services Discovered")
             val serviceUUID = gatt.getService(SERVICE_UUID)
-            val stepCharUuid = serviceUUID.getCharacteristic(STEPS_CHAR_UUID)
+            val batteryCharUuid = serviceUUID.getCharacteristic(BATTERY_CHAR_UUID)
             val caloriesCharUuid = serviceUUID.getCharacteristic(CALORIES_CHAR_UUID)
-            characteristicList.add(stepCharUuid)
+            characteristicList.add(batteryCharUuid)
             characteristicList.add(caloriesCharUuid)
             readDataFromDevice()
         }
@@ -87,7 +87,7 @@ class HomeFragment : Fragment() {
         ) {
             if(status == BluetoothGatt.GATT_SUCCESS){
                 when(characteristic?.uuid){
-                    STEPS_CHAR_UUID -> {
+                    BATTERY_CHAR_UUID -> {
                         Log.d(TAG, characteristic.value!!.toHexString())
                     }
                     CALORIES_CHAR_UUID -> {
