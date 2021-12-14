@@ -21,9 +21,7 @@ import com.example.miclone.R
 import com.example.miclone.entities.PreviousValueEntity
 import com.example.miclone.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import java.lang.IllegalArgumentException
 
 @AndroidEntryPoint
