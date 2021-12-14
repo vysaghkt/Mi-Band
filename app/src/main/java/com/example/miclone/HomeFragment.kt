@@ -54,6 +54,8 @@ class HomeFragment : Fragment() {
 
     private val bluetoothGattCallBack = object : BluetoothGattCallback(){
 
+        private val characteristicList = mutableListOf<BluetoothGattCharacteristic>()
+
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
             if (newState == BluetoothProfile.STATE_CONNECTED){
                 Log.d(TAG,"Device with ${gatt.device.address} is connected")
@@ -64,13 +66,18 @@ class HomeFragment : Fragment() {
             }
         }
 
-        override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
+        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
             Log.d(TAG,"Services Discovered")
-            val serviceUUID = gatt?.getService(SERVICE_UUID)
-            val stepCharUuid = serviceUUID?.getCharacteristic(STEPS_CHAR_UUID)
-            readDataFromDevice(stepCharUuid)
-            val caloriesCharUuid = serviceUUID?.getCharacteristic(CALORIES_CHAR_UUID)
-            readDataFromDevice(caloriesCharUuid)
+            val serviceUUID = gatt.getService(SERVICE_UUID)
+            val stepCharUuid = serviceUUID.getCharacteristic(STEPS_CHAR_UUID)
+            val caloriesCharUuid = serviceUUID.getCharacteristic(CALORIES_CHAR_UUID)
+            characteristicList.add(stepCharUuid)
+            characteristicList.add(caloriesCharUuid)
+            readDataFromDevice()
+        }
+
+        private fun readDataFromDevice() {
+            bluetoothGatt?.readCharacteristic(characteristicList[characteristicList.size - 1])
         }
 
         override fun onCharacteristicRead(
@@ -87,12 +94,14 @@ class HomeFragment : Fragment() {
                         Log.d(TAG, characteristic.value!!.toHexString())
                     }
                 }
+                characteristicList.removeAt(characteristicList.size - 1)
+                if (characteristicList.size > 0){
+                    readDataFromDevice()
+                }else {
+                    Log.d(TAG,"Successfully Read Data From Device")
+                }
             }
         }
-    }
-
-    private fun readDataFromDevice(uuid: BluetoothGattCharacteristic?) {
-        bluetoothGatt?.readCharacteristic(uuid)
     }
 
     private fun promptBluetoothEnable() {
