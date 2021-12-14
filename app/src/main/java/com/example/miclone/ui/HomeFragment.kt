@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.miclone.contants.Constants.CALORIES_CHAR_UUID
 import com.example.miclone.contants.Constants.MI_BAND_MAX_ADDRESS
 import com.example.miclone.contants.Constants.SERVICE_UUID
@@ -20,6 +21,8 @@ import com.example.miclone.R
 import com.example.miclone.entities.PreviousValueEntity
 import com.example.miclone.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.lang.Exception
 import java.lang.IllegalArgumentException
 
@@ -99,10 +102,14 @@ class HomeFragment : Fragment() {
                 Log.d(TAG, "Device with ${gatt.device.address} is connected")
                 bluetoothGatt = gatt
                 bluetoothGatt?.discoverServices()
-                connectionStatusTv.text = getString(R.string.connected)
+                lifecycleScope.launch {
+                    connectionStatusTv.text = getString(R.string.connected)
+                }
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "Device Disconnected")
-                connectionStatusTv.text = getString(R.string.disconnected)
+                lifecycleScope.launch {
+                    connectionStatusTv.text = getString(R.string.disconnected)
+                }
                 connectDevice()
             }
         }
@@ -142,10 +149,12 @@ class HomeFragment : Fragment() {
                     readDataFromDevice()
                 }else{
                     Log.d(TAG,"Read Completed")
-//                    batteryPercentTv.text = batteryLevel.toString()
-//                    stepsWalkedTv.text = steps.toString()
-//                    distanceCoveredTv.text = distance.toString()
-//                    caloriesBurnedTv.text = calories.toString()
+                    lifecycleScope.launch {
+                        batteryPercentTv.text = batteryLevel.toString()
+                        stepsWalkedTv.text = steps.toString()
+                        distanceCoveredTv.text = distance.toString()
+                        caloriesBurnedTv.text = calories.toString()
+                    }
                 }
             }
         }
