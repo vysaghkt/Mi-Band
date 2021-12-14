@@ -10,4 +10,6 @@
     <string name="metre">m</string>
     <string name="distance">Distance</string>
     <string name="bluetooth_not_connected">Bluetooth Not Connected</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
 </resources>

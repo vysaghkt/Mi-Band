@@ -15,9 +15,9 @@
         android:gravity="center"
         android:text="@string/bluetooth_not_connected"
         android:textColor="@color/white"
+        android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:visibility="invisible"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/batteryPercentage"
@@ -107,7 +107,7 @@
         app:layout_constraintTop_toBottomOf="@+id/caloriesTextView" />
 
     <TextView
-        android:id="@+id/stepsTextView"
+        android:id="@+id/distanceTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="80dp"
@@ -127,9 +127,9 @@
         android:text="@string/metre"
         android:textSize="20sp"
         android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="@+id/stepsTextView"
-        app:layout_constraintStart_toEndOf="@+id/stepsTextView"
-        app:layout_constraintTop_toTopOf="@+id/stepsTextView" />
+        app:layout_constraintBottom_toBottomOf="@+id/distanceTextView"
+        app:layout_constraintStart_toEndOf="@+id/distanceTextView"
+        app:layout_constraintTop_toTopOf="@+id/distanceTextView" />
 
     <TextView
         android:id="@+id/textView4"
@@ -140,17 +140,17 @@
         android:textSize="20sp"
         android:textStyle="italic|bold"
         app:layout_constraintEnd_toEndOf="@+id/textView5"
-        app:layout_constraintStart_toStartOf="@+id/stepsTextView"
-        app:layout_constraintTop_toBottomOf="@+id/stepsTextView" />
+        app:layout_constraintStart_toStartOf="@id/distanceTextView"
+        app:layout_constraintTop_toBottomOf="@id/distanceTextView" />
 
     <TextView
-        android:id="@+id/lastUpdated"
+        android:id="@+id/connectionStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="@string/disconnected"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/textView5"
         app:layout_constraintStart_toStartOf="@+id/caloriesTextView"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
-        tools:text="Last Updated: 14 Dec 2021, 10:53" />
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,8 +21,9 @@ class HomeFragment : Fragment() {
 
     private lateinit var binding: FragmentHomeBinding
 
-    private val bluetoothAdapter:BluetoothAdapter by lazy {
-        val bluetoothManager = requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    private val bluetoothAdapter: BluetoothAdapter by lazy {
+        val bluetoothManager =
+            requireContext().getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothManager.adapter
     }
 
@@ -34,9 +35,9 @@ class HomeFragment : Fragment() {
     ): View {
         binding = FragmentHomeBinding.inflate(layoutInflater)
 
-        if (!bluetoothAdapter.isEnabled){
+        if (!bluetoothAdapter.isEnabled) {
             promptBluetoothEnable()
-        }else {
+        } else {
             connectDevice()
         }
 
@@ -47,27 +48,28 @@ class HomeFragment : Fragment() {
         try {
             val device = bluetoothAdapter.getRemoteDevice(MI_BAND_MAX_ADDRESS)
             device.connectGatt(requireContext(), false, bluetoothGattCallBack)
-        }catch (e: IllegalArgumentException){
-            Log.d(TAG,"Invalid Mac Address")
+        } catch (e: IllegalArgumentException) {
+            Log.d(TAG, "Invalid Mac Address")
         }
     }
 
-    private val bluetoothGattCallBack = object : BluetoothGattCallback(){
+    private val bluetoothGattCallBack = object : BluetoothGattCallback() {
 
         private val characteristicList = mutableListOf<BluetoothGattCharacteristic>()
 
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-            if (newState == BluetoothProfile.STATE_CONNECTED){
-                Log.d(TAG,"Device with ${gatt.device.address} is connected")
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                Log.d(TAG, "Device with ${gatt.device.address} is connected")
                 bluetoothGatt = gatt
                 bluetoothGatt?.discoverServices()
-            }else if (newState == BluetoothProfile.STATE_DISCONNECTED){
-                Log.d(TAG,"Device Disconnected")
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                Log.d(TAG, "Device Disconnected")
+                binding.connectionStatus.text = getString(R.string.disconnected)
             }
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-            Log.d(TAG,"Services Discovered")
+            Log.d(TAG, "Services Discovered")
             val serviceUUID = gatt.getService(SERVICE_UUID)
             val batteryCharUuid = serviceUUID.getCharacteristic(BATTERY_CHAR_UUID)
             val caloriesCharUuid = serviceUUID.getCharacteristic(CALORIES_CHAR_UUID)
@@ -85,48 +87,71 @@ class HomeFragment : Fragment() {
             characteristic: BluetoothGattCharacteristic?,
             status: Int
         ) {
-            if(status == BluetoothGatt.GATT_SUCCESS){
-                when(characteristic?.uuid){
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                when (characteristic?.uuid) {
                     BATTERY_CHAR_UUID -> {
                         Log.d(TAG, characteristic.value!!.toHexString())
+                        showBatteryPercent(characteristic.value)
                     }
                     CALORIES_CHAR_UUID -> {
                         Log.d(TAG, characteristic.value!!.toHexString())
+                        showStepsAndCalories(characteristic.value)
                     }
                 }
                 characteristicList.removeAt(characteristicList.size - 1)
-                if (characteristicList.size > 0){
+                if (characteristicList.size > 0) {
                     readDataFromDevice()
-                }else {
-                    Log.d(TAG,"Successfully Read Data From Device")
                 }
             }
         }
     }
 
+    private fun showBatteryPercent(value: ByteArray) {
+        val batteryLevel = value[1].toInt()
+        Log.d(TAG, "Battery : $batteryLevel")
+    }
+
+    private fun showStepsAndCalories(value: ByteArray) {
+        val steps = (value[4].toInt() and 0xFF shl 24) +
+                (value[3].toInt() and 0xFF shl 16) +
+                (value[2].toInt() and 0xFF shl 8) +
+                (value[1].toInt() and 0xFF)
+        Log.d(TAG, "Steps : $steps")
+        val distance = (value[8].toInt() and 0xFF shl 24) +
+                (value[7].toInt() and 0xFF shl 16) +
+                (value[6].toInt() and 0xFF shl 8) +
+                (value[5].toInt() and 0xFF)
+        Log.d(TAG, "Distance : $distance")
+        val calories = (value[12].toInt() and 0xFF shl 24) +
+                (value[11].toInt() and 0xFF shl 16) +
+                (value[10].toInt() and 0xFF shl 8) +
+                (value[9].toInt() and 0xFF)
+        Log.d(TAG, "Calories : $calories")
+    }
+
     private fun promptBluetoothEnable() {
-        val intent  = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+        val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
         startActivityForResult(intent, ENABLE_BLUETOOTH_REQUEST_CODE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when(requestCode){
+        when (requestCode) {
             ENABLE_BLUETOOTH_REQUEST_CODE -> {
-                if (resultCode == Activity.RESULT_OK){
-                    if (!bluetoothAdapter.isEnabled){
+                if (resultCode == Activity.RESULT_OK) {
+                    if (!bluetoothAdapter.isEnabled) {
                         binding.bluetoothConnected.visibility = View.VISIBLE
-                    }else{
+                    } else {
                         binding.bluetoothConnected.visibility = View.GONE
                     }
-                }else if (resultCode == Activity.RESULT_CANCELED){
+                } else if (resultCode == Activity.RESULT_CANCELED) {
                     binding.bluetoothConnected.visibility = View.VISIBLE
                 }
             }
         }
     }
 
-    fun ByteArray.toHexString() = joinToString ("-"){ "%02x".format(it) }
+    fun ByteArray.toHexString() = joinToString("-") { "%02x".format(it) }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -134,7 +159,7 @@ class HomeFragment : Fragment() {
         bluetoothGatt = null
     }
 
-    companion object{
+    companion object {
         private const val ENABLE_BLUETOOTH_REQUEST_CODE = 1
         private const val TAG = "MI_BAND"
     }
