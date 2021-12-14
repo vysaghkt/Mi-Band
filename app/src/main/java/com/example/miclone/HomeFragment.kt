@@ -98,7 +98,7 @@ class HomeFragment : Fragment() {
         }
 
         private fun readDataFromDevice() {
-            bluetoothGatt?.readCharacteristic(characteristicList[characteristicList.size - 1])
+            bluetoothGatt?.readCharacteristic(characteristicList.first())
         }
 
         override fun onCharacteristicRead(
@@ -117,7 +117,7 @@ class HomeFragment : Fragment() {
                         showStepsAndCalories(characteristic.value)
                     }
                 }
-                characteristicList.removeAt(characteristicList.size - 1)
+                characteristicList.removeAt(0)
                 if (characteristicList.size > 0) {
                     readDataFromDevice()
                 }
@@ -126,30 +126,32 @@ class HomeFragment : Fragment() {
     }
 
     private fun showBatteryPercent(value: ByteArray) {
-        val batteryLevel = value[1].toInt()
+        val batteryLevel = value[1].toUByte().toInt()
         Log.d(TAG, "Battery : $batteryLevel")
         batteryPercentTv.text = batteryLevel.toString()
+        return
     }
 
     private fun showStepsAndCalories(value: ByteArray) {
-        val steps = (value[4].toInt() and 0xFF shl 24) +
-                (value[3].toInt() and 0xFF shl 16) +
-                (value[2].toInt() and 0xFF shl 8) +
-                (value[1].toInt() and 0xFF)
+        val steps = (value[4].toUByte().toInt() and 0xFF shl 24) +
+                (value[3].toUByte().toInt() and 0xFF shl 16) +
+                (value[2].toUByte().toInt() and 0xFF shl 8) +
+                (value[1].toUByte().toInt() and 0xFF)
         Log.d(TAG, "Steps : $steps")
-        val distance = (value[8].toInt() and 0xFF shl 24) +
-                (value[7].toInt() and 0xFF shl 16) +
-                (value[6].toInt() and 0xFF shl 8) +
-                (value[5].toInt() and 0xFF)
-        Log.d(TAG, "Distance : $distance")
-        val calories = (value[12].toInt() and 0xFF shl 24) +
-                (value[11].toInt() and 0xFF shl 16) +
-                (value[10].toInt() and 0xFF shl 8) +
-                (value[9].toInt() and 0xFF)
-        Log.d(TAG, "Calories : $calories")
         stepsWalkedTv.text = steps.toString()
-        caloriesBurnedTv.text = calories.toString()
+        val distance = (value[8].toUByte().toInt() and 0xFF shl 24) +
+                (value[7].toUByte().toInt() and 0xFF shl 16) +
+                (value[6].toUByte().toInt() and 0xFF shl 8) +
+                (value[5].toUByte().toInt() and 0xFF)
+        Log.d(TAG, "Distance : $distance")
         distanceCoveredTv.text = distance.toString()
+        val calories = (value[12].toUByte().toInt() and 0xFF shl 24) +
+                (value[11].toUByte().toInt() and 0xFF shl 16) +
+                (value[10].toUByte().toInt() and 0xFF shl 8) +
+                (value[9].toUByte().toInt() and 0xFF)
+        Log.d(TAG, "Calories : $calories")
+        caloriesBurnedTv.text = calories.toString()
+        return
     }
 
     private fun promptBluetoothEnable() {
