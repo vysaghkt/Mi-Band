@@ -1,4 +1,4 @@
-package com.example.miclone
+package com.example.miclone.ui
 
 import android.app.Activity
 import android.bluetooth.*
@@ -11,10 +11,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.example.miclone.Constants.CALORIES_CHAR_UUID
-import com.example.miclone.Constants.MI_BAND_MAX_ADDRESS
-import com.example.miclone.Constants.SERVICE_UUID
-import com.example.miclone.Constants.BATTERY_CHAR_UUID
+import com.example.miclone.contants.Constants.CALORIES_CHAR_UUID
+import com.example.miclone.contants.Constants.MI_BAND_MAX_ADDRESS
+import com.example.miclone.contants.Constants.SERVICE_UUID
+import com.example.miclone.contants.Constants.BATTERY_CHAR_UUID
+import com.example.miclone.R
 import java.lang.IllegalArgumentException
 
 class HomeFragment : Fragment() {
