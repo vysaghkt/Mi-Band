@@ -11,13 +11,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 import com.example.miclone.contants.Constants.CALORIES_CHAR_UUID
 import com.example.miclone.contants.Constants.MI_BAND_MAX_ADDRESS
 import com.example.miclone.contants.Constants.SERVICE_UUID
 import com.example.miclone.contants.Constants.BATTERY_CHAR_UUID
 import com.example.miclone.R
+import com.example.miclone.entities.PreviousValueEntity
+import com.example.miclone.viewmodel.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import java.lang.Exception
 import java.lang.IllegalArgumentException
 
+@AndroidEntryPoint
 class HomeFragment : Fragment() {
 
     private val bluetoothAdapter: BluetoothAdapter by lazy {
@@ -28,12 +34,24 @@ class HomeFragment : Fragment() {
 
     private var bluetoothGatt: BluetoothGatt? = null
 
+    private lateinit var mainViewModel: MainViewModel
+
     private lateinit var bluetoothEnabledTv: TextView
     private lateinit var batteryPercentTv: TextView
     private lateinit var stepsWalkedTv: TextView
     private lateinit var caloriesBurnedTv: TextView
     private lateinit var distanceCoveredTv: TextView
     private lateinit var connectionStatusTv: TextView
+
+    private var batteryLevel: Int = 0
+    private var steps: Int = 0
+    private var calories: Int = 0
+    private var distance: Int = 0
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mainViewModel = ViewModelProvider(requireActivity())[MainViewModel::class.java]
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -51,15 +69,16 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_home, container, false)
+        return inflater.inflate(R.layout.fragment_home, container, false)
+    }
 
+    override fun onResume() {
+        super.onResume()
         if (!bluetoothAdapter.isEnabled) {
             promptBluetoothEnable()
         } else {
             connectDevice()
         }
-
-        return view
     }
 
     private fun connectDevice() {
@@ -121,37 +140,42 @@ class HomeFragment : Fragment() {
                 characteristicList.removeAt(0)
                 if (characteristicList.size > 0) {
                     readDataFromDevice()
+                }else{
+                    Log.d(TAG,"Read Completed")
+//                    batteryPercentTv.text = batteryLevel.toString()
+//                    stepsWalkedTv.text = steps.toString()
+//                    distanceCoveredTv.text = distance.toString()
+//                    caloriesBurnedTv.text = calories.toString()
                 }
             }
         }
     }
 
     private fun showBatteryPercent(value: ByteArray) {
-        val batteryLevel = value[1].toUByte().toInt()
+        batteryLevel = value[1].toUByte().toInt()
         Log.d(TAG, "Battery : $batteryLevel")
-        batteryPercentTv.text = batteryLevel.toString()
         return
     }
 
     private fun showStepsAndCalories(value: ByteArray) {
-        val steps = (value[4].toUByte().toInt() and 0xFF shl 24) +
+        steps = (value[4].toUByte().toInt() and 0xFF shl 24) +
                 (value[3].toUByte().toInt() and 0xFF shl 16) +
                 (value[2].toUByte().toInt() and 0xFF shl 8) +
                 (value[1].toUByte().toInt() and 0xFF)
         Log.d(TAG, "Steps : $steps")
-        stepsWalkedTv.text = steps.toString()
-        val distance = (value[8].toUByte().toInt() and 0xFF shl 24) +
+
+        distance = (value[8].toUByte().toInt() and 0xFF shl 24) +
                 (value[7].toUByte().toInt() and 0xFF shl 16) +
                 (value[6].toUByte().toInt() and 0xFF shl 8) +
                 (value[5].toUByte().toInt() and 0xFF)
         Log.d(TAG, "Distance : $distance")
-        distanceCoveredTv.text = distance.toString()
-        val calories = (value[12].toUByte().toInt() and 0xFF shl 24) +
+
+        calories = (value[12].toUByte().toInt() and 0xFF shl 24) +
                 (value[11].toUByte().toInt() and 0xFF shl 16) +
                 (value[10].toUByte().toInt() and 0xFF shl 8) +
                 (value[9].toUByte().toInt() and 0xFF)
         Log.d(TAG, "Calories : $calories")
-        caloriesBurnedTv.text = calories.toString()
+
         return
     }
 
@@ -178,6 +202,19 @@ class HomeFragment : Fragment() {
     }
 
     fun ByteArray.toHexString() = joinToString("-") { "%02x".format(it) }
+
+    override fun onPause() {
+        super.onPause()
+        mainViewModel.insertPreviousValue(
+            PreviousValueEntity(
+                0,
+                batteryLevel.toString(),
+                steps.toString(),
+                calories.toString(),
+                distance.toString()
+            )
+        )
+    }
 
     override fun onDestroy() {
         super.onDestroy()
