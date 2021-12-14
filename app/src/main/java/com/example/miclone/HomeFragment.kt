@@ -10,16 +10,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import com.example.miclone.Constants.CALORIES_CHAR_UUID
 import com.example.miclone.Constants.MI_BAND_MAX_ADDRESS
 import com.example.miclone.Constants.SERVICE_UUID
 import com.example.miclone.Constants.BATTERY_CHAR_UUID
-import com.example.miclone.databinding.FragmentHomeBinding
 import java.lang.IllegalArgumentException
 
 class HomeFragment : Fragment() {
-
-    private lateinit var binding: FragmentHomeBinding
 
     private val bluetoothAdapter: BluetoothAdapter by lazy {
         val bluetoothManager =
@@ -29,11 +27,30 @@ class HomeFragment : Fragment() {
 
     private var bluetoothGatt: BluetoothGatt? = null
 
+    private lateinit var bluetoothEnabledTv: TextView
+    private lateinit var batteryPercentTv: TextView
+    private lateinit var stepsWalkedTv: TextView
+    private lateinit var caloriesBurnedTv: TextView
+    private lateinit var distanceCoveredTv: TextView
+    private lateinit var connectionStatusTv: TextView
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        bluetoothEnabledTv = view.findViewById(R.id.bluetoothConnected)
+        batteryPercentTv = view.findViewById(R.id.batteryPercentage)
+        stepsWalkedTv = view.findViewById(R.id.stepTextView)
+        caloriesBurnedTv = view.findViewById(R.id.caloriesTextView)
+        distanceCoveredTv = view.findViewById(R.id.distanceTextView)
+        connectionStatusTv = view.findViewById(R.id.connectionStatus)
+
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentHomeBinding.inflate(layoutInflater)
+        val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         if (!bluetoothAdapter.isEnabled) {
             promptBluetoothEnable()
@@ -41,7 +58,7 @@ class HomeFragment : Fragment() {
             connectDevice()
         }
 
-        return binding.root
+        return view
     }
 
     private fun connectDevice() {
@@ -62,9 +79,11 @@ class HomeFragment : Fragment() {
                 Log.d(TAG, "Device with ${gatt.device.address} is connected")
                 bluetoothGatt = gatt
                 bluetoothGatt?.discoverServices()
+                connectionStatusTv.text = getString(R.string.connected)
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 Log.d(TAG, "Device Disconnected")
-                binding.connectionStatus.text = getString(R.string.disconnected)
+                connectionStatusTv.text = getString(R.string.disconnected)
+                connectDevice()
             }
         }
 
@@ -109,6 +128,7 @@ class HomeFragment : Fragment() {
     private fun showBatteryPercent(value: ByteArray) {
         val batteryLevel = value[1].toInt()
         Log.d(TAG, "Battery : $batteryLevel")
+        batteryPercentTv.text = batteryLevel.toString()
     }
 
     private fun showStepsAndCalories(value: ByteArray) {
@@ -127,6 +147,9 @@ class HomeFragment : Fragment() {
                 (value[10].toInt() and 0xFF shl 8) +
                 (value[9].toInt() and 0xFF)
         Log.d(TAG, "Calories : $calories")
+        stepsWalkedTv.text = steps.toString()
+        caloriesBurnedTv.text = calories.toString()
+        distanceCoveredTv.text = distance.toString()
     }
 
     private fun promptBluetoothEnable() {
@@ -140,12 +163,12 @@ class HomeFragment : Fragment() {
             ENABLE_BLUETOOTH_REQUEST_CODE -> {
                 if (resultCode == Activity.RESULT_OK) {
                     if (!bluetoothAdapter.isEnabled) {
-                        binding.bluetoothConnected.visibility = View.VISIBLE
+                        bluetoothEnabledTv.visibility = View.VISIBLE
                     } else {
-                        binding.bluetoothConnected.visibility = View.GONE
+                        bluetoothEnabledTv.visibility = View.GONE
                     }
                 } else if (resultCode == Activity.RESULT_CANCELED) {
-                    binding.bluetoothConnected.visibility = View.VISIBLE
+                    bluetoothEnabledTv.visibility = View.VISIBLE
                 }
             }
         }
