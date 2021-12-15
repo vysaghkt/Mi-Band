@@ -12,4 +12,8 @@
     <string name="bluetooth_not_connected">Bluetooth Not Connected</string>
     <string name="connected">Connected</string>
     <string name="disconnected">Disconnected</string>
+    <string name="step_goals">Step Goals</string>
+    <string name="steps">steps</string>
+    <string name="value_of_goal">1000</string>
+    <string name="update">Update</string>
 </resources>
