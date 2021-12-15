@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -18,7 +19,6 @@ import com.example.miclone.contants.Constants.MI_BAND_MAX_ADDRESS
 import com.example.miclone.contants.Constants.SERVICE_UUID
 import com.example.miclone.contants.Constants.BATTERY_CHAR_UUID
 import com.example.miclone.R
-import com.example.miclone.entities.PreviousValueEntity
 import com.example.miclone.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -43,6 +43,7 @@ class HomeFragment : Fragment() {
     private lateinit var caloriesBurnedTv: TextView
     private lateinit var distanceCoveredTv: TextView
     private lateinit var connectionStatusTv: TextView
+    private lateinit var progressBar: ProgressBar
 
     private var batteryLevel: Int = 0
     private var steps: Int = 0
@@ -63,6 +64,7 @@ class HomeFragment : Fragment() {
         caloriesBurnedTv = view.findViewById(R.id.caloriesTextView)
         distanceCoveredTv = view.findViewById(R.id.distanceTextView)
         connectionStatusTv = view.findViewById(R.id.connectionStatus)
+        progressBar = view.findViewById(R.id.progressBar)
 
     }
 
@@ -81,7 +83,6 @@ class HomeFragment : Fragment() {
             connectDevice()
         }
     }
-
     private fun connectDevice() {
         try {
             val device = bluetoothAdapter.getRemoteDevice(MI_BAND_MAX_ADDRESS)
@@ -148,10 +149,7 @@ class HomeFragment : Fragment() {
                 }else{
                     Log.d(TAG,"Read Completed")
                     lifecycleScope.launch {
-                        batteryPercentTv.text = batteryLevel.toString()
-                        stepsWalkedTv.text = steps.toString()
-                        distanceCoveredTv.text = distance.toString()
-                        caloriesBurnedTv.text = calories.toString()
+                        updateUi()
                     }
                 }
             }
@@ -186,6 +184,17 @@ class HomeFragment : Fragment() {
         return
     }
 
+    private fun updateUi(){
+        batteryPercentTv.text = batteryLevel.toString()
+        stepsWalkedTv.text = steps.toString()
+        distanceCoveredTv.text = distance.toString()
+        caloriesBurnedTv.text = calories.toString()
+        mainViewModel.readStepGoal.observe(viewLifecycleOwner, {
+            progressBar.max = it
+        })
+        progressBar.progress = steps
+    }
+
     private fun promptBluetoothEnable() {
         val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
         startActivityForResult(intent, ENABLE_BLUETOOTH_REQUEST_CODE)
@@ -209,19 +218,6 @@ class HomeFragment : Fragment() {
     }
 
     fun ByteArray.toHexString() = joinToString("-") { "%02x".format(it) }
-
-    override fun onPause() {
-        super.onPause()
-        mainViewModel.insertPreviousValue(
-            PreviousValueEntity(
-                0,
-                batteryLevel.toString(),
-                steps.toString(),
-                calories.toString(),
-                distance.toString()
-            )
-        )
-    }
 
     override fun onDestroy() {
         super.onDestroy()

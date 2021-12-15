@@ -45,6 +45,7 @@ class SettingsFragment : Fragment() {
         updateBtn.setOnClickListener {
             mainViewModel.storeStepGoals(stepGoalEt.text.toString().toInt())
             updateBtn.isEnabled = false
+            Toast.makeText(requireContext(),"Updated Successfully",Toast.LENGTH_LONG).show()
         }
 
         return view
