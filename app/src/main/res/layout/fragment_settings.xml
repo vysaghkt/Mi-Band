@@ -24,11 +24,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:hint="@string/steps"
         android:minWidth="150dp"
-        android:text="@string/value_of_goal"
         android:textColor="@color/black"
         android:textSize="25sp"
+        android:inputType="number"
         app:layout_constraintBottom_toBottomOf="@+id/textviewGoal"
         app:layout_constraintStart_toEndOf="@+id/textviewGoal"
         app:layout_constraintTop_toTopOf="@+id/textviewGoal" />
@@ -41,6 +40,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/stepGoalEditText"
         app:layout_constraintStart_toEndOf="@+id/stepGoalEditText"
         app:layout_constraintTop_toTopOf="@+id/stepGoalEditText"
-        android:visibility="invisible"/>
+        android:enabled="false"
+        android:backgroundTint="@color/design_default_color_primary"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

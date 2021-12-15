@@ -7,6 +7,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.miclone.repository.Repository
 import com.example.miclone.entities.PreviousValueEntity
+import com.example.miclone.repository.DataStoreRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,6 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    private val dataStoreRepository: DataStoreRepository,
     private val repository: Repository,
     application: Application
 ): AndroidViewModel(application) {
@@ -22,5 +24,11 @@ class MainViewModel @Inject constructor(
 
     fun insertPreviousValue(previousValueEntity: PreviousValueEntity) = viewModelScope.launch(Dispatchers.IO) {
         repository.local.insertPreviousValue(previousValueEntity)
+    }
+
+    val readStepGoal: LiveData<Int> = dataStoreRepository.getStepGoals.asLiveData()
+
+    fun storeStepGoals(value : Int) = viewModelScope.launch(Dispatchers.IO) {
+        dataStoreRepository.storeStepGoal(value)
     }
 }
